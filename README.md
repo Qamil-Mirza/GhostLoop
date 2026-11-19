@@ -2,7 +2,7 @@
 
 **Your first users, before your first real user.**
 
-![GhostLoop in 30 seconds: drop in your app, AI testers try it, GhostLoop shows where they get stuck, you approve a fix, and they test it again.](docs/media/ghostloop-promo.gif)
+![GhostLoop in 35 seconds: a ghost slips out of a laptop, you drop in your app, a swarm of AI ghost testers dives into the browser, GhostLoop shows where they get stuck, you approve three fixes, they test it again and celebrate.](docs/media/ghostloop-promo.gif)
 
 Before you launch, nobody has used your app yet. So you can't see where people will get confused, click the wrong thing, or give up. GhostLoop lets you find out first.
 
