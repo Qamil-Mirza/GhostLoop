@@ -1,5 +1,7 @@
 # GhostLoop — promo (v5)
 
+> The current cut is **v6** ([`v6/README.md`](v6/README.md)). It keeps this film's product beats and adds Higgsfield-generated 3D hero shots. The root README's GIF now comes from v6.
+
 A 30-second, 1920×1080 / 30 fps film, animated with GSAP and rendered with FFmpeg. v5 rebuilds the v3 story in the product's brand and with real motion design.
 
 **What changed from v3:**

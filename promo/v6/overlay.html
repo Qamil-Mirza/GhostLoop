@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GhostLoop v6 overlays</title>
+<style>
+@font-face{font-family:Inter;src:url('../assets/inter-regular.woff2');font-weight:400}
+@font-face{font-family:Inter;src:url('../assets/inter-semibold.woff2');font-weight:600}
+@font-face{font-family:Inter;src:url('../assets/inter-extrabold.woff2');font-weight:800}
+:root{--cream:#f7f7f2;--ink:#17201d;--muted:#66716c;--coral:#ee7375}
+html,body{margin:0;background:transparent;font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#stage{width:1920px;height:1080px;position:relative;overflow:hidden;background:transparent}
+.layer{position:absolute;inset:0;visibility:hidden}
+/* Captions: same type, size and motion as v5 (style.css .caption) */
+.cap-wrap{position:absolute;left:0;right:0;top:58px;height:120px}
+.caption{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:0 .27em;font-size:74px;font-weight:800;letter-spacing:-3.8px;white-space:nowrap;color:var(--ink)}
+.caption .w{display:inline-block;overflow:hidden;padding:0 .04em .12em;margin-bottom:-.12em}.caption .w>span{display:inline-block}
+.caption em{font-style:normal;color:var(--coral)}
+.caption.light{color:#f7f7f2;text-shadow:0 4px 30px #0008}.caption.light em{color:#ff9a9b}
+/* Soft top shade so light captions read over bright AI frames */
+.shade{position:absolute;left:0;right:0;top:0;height:300px;background:linear-gradient(#0d1210b3 0%,#0d121066 45%,#0d121000 100%)}
+/* End card: wordmark and tagline on the empty right side of the hero shot */
+#end-block{position:absolute;left:1000px;width:860px;top:330px;display:flex;flex-direction:column;align-items:center}
+#mark{font-size:168px;font-weight:800;letter-spacing:-10px;line-height:1;white-space:nowrap;color:var(--ink);display:flex;align-items:baseline}
+#mark .oo{display:inline-flex;align-items:baseline;margin:0 4px 0 2px}
+#mark .o{display:inline-block;width:.5em;height:.5em;border:.115em solid var(--coral);border-radius:50%;box-sizing:border-box;margin-right:-.06em}
+#tagline{margin-top:34px;font-size:44px;font-weight:600;letter-spacing:-1.6px;color:var(--muted);text-align:center;line-height:1.2}
+#tagline b{color:var(--ink);font-weight:600;display:block}
+</style></head><body>
+<div id="stage">
+  <div class="layer" id="L-capA"><div class="shade"></div><div class="cap-wrap"><div class="caption light" data-text="Your first users are *ghosts.*"></div></div></div>
+  <div class="layer" id="L-capB"><div class="shade"></div><div class="cap-wrap"><div class="caption light" data-text="AI testers. *Real browser.*"></div></div></div>
+  <div class="layer" id="L-end">
+    <div id="end-block">
+      <div id="mark"><span class="m-l">ghostl</span><span class="oo"><i class="o"></i><i class="o"></i></span><span class="m-r">p</span></div>
+      <div id="tagline"><span class="t1">Your first users,</span><b class="t2">before your first real user.</b></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/gsap.min.js"></script>
+<script>
+// Each overlay is a paused GSAP timeline sampled at exact times by compose.mjs (renderAt), so output is deterministic.
+document.querySelectorAll('.caption').forEach(c => {
+  c.innerHTML = c.dataset.text.split(/(\*[^*]+\*)/).filter(Boolean).flatMap(part => {
+    const em = part.startsWith('*');
+    return part.replace(/\*/g, '').trim().split(/\s+/).map(w => `<span class="w"><span>${em ? `<em>${w}</em>` : w}</span></span>`);
+  }).join('');
+});
+function captionTL(id, inAt, outAt) {
+  const words = `#${id} .caption .w>span`, tl = gsap.timeline({ paused: true });
+  tl.fromTo(`#${id} .shade`, { opacity: 0 }, { opacity: 1, duration: .5, ease: 'power1.out' }, Math.max(0, inAt - .2))
+    .fromTo(words, { yPercent: 115, rotation: 4 }, { yPercent: 0, rotation: 0, duration: .65, stagger: .055, ease: 'expo.out' }, inAt)
+    .to(words, { yPercent: -115, duration: .32, stagger: .03, ease: 'power2.in' }, outAt)
+    .to(`#${id} .shade`, { opacity: 0, duration: .4, ease: 'power1.in' }, outAt + .1);
+  return tl;
+}
+function endTL() {
+  const tl = gsap.timeline({ paused: true });
+  tl.fromTo('#mark .m-l', { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, ease: 'expo.out' }, .55)
+    .fromTo('#mark .o', { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: .8, stagger: .09, ease: 'back.out(2.2)' }, .7)
+    .fromTo('#mark .m-r', { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, ease: 'expo.out' }, .8)
+    .fromTo('#tagline .t1', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'power3.out' }, 1.35)
+    .fromTo('#tagline .t2', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'power3.out' }, 1.55);
+  return tl;
+}
+// Durations here must match the segment lengths in compose.mjs.
+const OVERLAYS = {
+  capA: { el: 'L-capA', tl: captionTL('L-capA', .7, 3.45) },
+  capB: { el: 'L-capB', tl: captionTL('L-capB', .35, 3.75) },
+  end:  { el: 'L-end',  tl: endTL() },
+};
+window.renderAt = (name, t) => {
+  for (const [k, o] of Object.entries(OVERLAYS)) document.getElementById(o.el).style.visibility = k === name ? 'visible' : 'hidden';
+  OVERLAYS[name].tl.seek(t, false);
+};
+window.overlaysReady = document.fonts.ready.then(() => true);
+</script></body></html>
